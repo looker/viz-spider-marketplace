@@ -262,14 +262,14 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		.data(data)
 		.enter().append("g")
 		.attr("class", "radarWrapper")
-    .attr("id", function(d,i) { return moreData[i].label; });
+    .attr("id", function(d,i) { return "v"+moreData[i].label; });
 	
   //console.log(moreData);
 	//Append the backgrounds	
 	blobWrapper
 		.append("path")
 		.attr("class", "radarArea")
-    .attr("id", function(d,i) { return moreData[i].label; })
+    .attr("id", function(d,i) { return "v"+moreData[i].label; })
 		.attr("d", function(d,i) { return radarLine(d); })
 		.style("fill", function(d,i) { return cfg.color(i); })
 		.style("fill-opacity", cfg.opacityArea)
@@ -323,7 +323,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		.data(data)
 		.enter().append("g")
 		.attr("class", "radarCircleWrapper")
-    .attr("child_id", function(d,i) { return moreData[i].label; });
+    .attr("child_id", function(d,i) { return "v"+moreData[i].label; });
 		
 	//Append a set of invisible circles on top for the mouseover pop-up
 	blobCircleWrapper.selectAll(".radarInvisibleCircle")
@@ -421,13 +421,13 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
         legendCell.classed('hidden', !legendCell.classed('hidden'));  // toggle opacity of legend item
       	series_sel = d3.select(`#${d}`)[0][0].classList.contains('hidden');
       	if (series_sel) {
-          d3.select(`#${d}`).style("opacity", "0").style("pointer-events","none");
+          d3.select(`#v${d}`).style("opacity", "0").style("pointer-events","none");
           d3.selectAll(`[child_id=${d}]`).style("pointer-events","none");
           d3.selectAll(`[series_id=${d}]`).style("pointer-events","none");
         } else {
-          d3.select(`#${d}`).style("opacity", "1").style("pointer-events",null);
-          d3.selectAll(`[child_id=${d}]`).style("pointer-events","all");
-          d3.selectAll(`[series_id=${d}]`).style("pointer-events","all");
+          d3.select(`#v${d}`).style("opacity", "1").style("pointer-events",null);
+          d3.selectAll(`[child_id=v${d}]`).style("pointer-events","all");
+          d3.selectAll(`[series_id=v${d}]`).style("pointer-events","all");
         }
       	legend_tru = legendCell[0][0].classList.contains('hidden');
       	if (legend_tru) {
