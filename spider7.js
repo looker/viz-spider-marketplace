@@ -262,14 +262,14 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		.data(data)
 		.enter().append("g")
 		.attr("class", "radarWrapper")
-    .attr("id", function(d,i) { return moreData[i].label; });
+    .attr("id", function(d,i) { return "v"+moreData[i].label; });
 	
   //console.log(moreData);
 	//Append the backgrounds	
 	blobWrapper
 		.append("path")
 		.attr("class", "radarArea")
-    .attr("id", function(d,i) { return moreData[i].label; })
+    .attr("id", function(d,i) { return "v"+moreData[i].label; })
 		.attr("d", function(d,i) { return radarLine(d); })
 		.style("fill", function(d,i) { return cfg.color(i); })
 		.style("fill-opacity", cfg.opacityArea)
@@ -323,7 +323,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		.data(data)
 		.enter().append("g")
 		.attr("class", "radarCircleWrapper")
-    .attr("child_id", function(d,i) { return moreData[i].label; });
+    .attr("child_id", function(d,i) { return "v"+moreData[i].label; });
 		
 	//Append a set of invisible circles on top for the mouseover pop-up
 	blobCircleWrapper.selectAll(".radarInvisibleCircle")
@@ -348,7 +348,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 				.style("fill-opacity", 0.1); 
 			//Bring back the hovered over blob
     	//console.log(".radarArea#"+this.parentNode.getAttribute("child_id"));
-			d3.select(".radarArea#"+this.parentNode.getAttribute("child_id"))
+			d3.select(".radarArea#v"+this.parentNode.getAttribute("child_id"))
 				.transition().duration(200)
 				.style("fill-opacity", 0.7);
 					
