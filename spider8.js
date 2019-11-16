@@ -348,7 +348,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 				.style("fill-opacity", 0.1); 
 			//Bring back the hovered over blob
     	//console.log(".radarArea#"+this.parentNode.getAttribute("child_id"));
-			d3.select(".radarArea#v"+this.parentNode.getAttribute("child_id"))
+			d3.select(".radarArea#"+this.parentNode.getAttribute("child_id"))
 				.transition().duration(200)
 				.style("fill-opacity", 0.7);
 					
