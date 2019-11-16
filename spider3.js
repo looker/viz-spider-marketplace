@@ -40,7 +40,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		
 	var allAxis = (data[0].map(function(i, j){return i.axis})),	//Names of each axis
 		total = allAxis.length,					//The number of different axes
-		radius = Math.min(cfg.w*.5, cfg.h*.6), 	//Radius of the outermost circle
+		radius = Math.min(cfg.w*.5, cfg.h*.5), 	//Radius of the outermost circle
 		Format = d3.format(",.0f"),			 	//Label formatting
 		angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
 	
