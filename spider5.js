@@ -251,7 +251,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	blobWrapper
 		.append("path")
 		.attr("class", "radarArea")
-    .attr("id", function(d,i) { "v"+return moreData[i].label; })
+    .attr("id", function(d,i) { return "v"+moreData[i].label; })
 		.attr("d", function(d,i) { return radarLine(d); })
 		.style("fill", function(d,i) { return cfg.color(i); })
 		.style("fill-opacity", cfg.opacityArea)
