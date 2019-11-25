@@ -744,7 +744,7 @@ const visObject = {
 	    
 	    formattedData = [];
 	    moreData = [];
-	    series.forEach(function(s) {
+	    series.forEach(function(s, index) {
 	      values = [];
 	      axes.forEach(function(a) {
 	        values.push({
