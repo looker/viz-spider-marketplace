@@ -1,4 +1,4 @@
-project_name: "viz-packed_bubble-marketplace"
+project_name: "viz-spider-marketplace"
 
 constant: VIS_LABEL {
   value: "Spider"
