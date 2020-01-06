@@ -789,7 +789,9 @@ const visObject = {
 	        values.push({
 	          axis: a['label'],
 	          name: a['name'],
-	          value: data[0][a['name']][s]['value']
+	          value: data[0][a['name']][s]['value'],
+	          rendered: data[0][a['name']][s]['rendered'],
+	          links: data[0][a['name']][s]['links']
 	        });
 	      });
 	      set = [];
