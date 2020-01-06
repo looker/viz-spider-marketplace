@@ -790,7 +790,7 @@ const visObject = {
 	          axis: a['label'],
 	          name: a['name'],
 	          value: data[0][a['name']][s]['value'],
-	          rendered: data[0][a['name']][s]['rendered'],
+	          rendered: data[0][a['name']][s]['rendered'] ? data[0][a['name']][s]['rendered'] : data[0][a['name']][s]['value'],
 	          links: data[0][a['name']][s]['links']
 	        });
 	      });
@@ -848,7 +848,7 @@ const visObject = {
 		          axis: a['label'],
 		          name: a['name'],
 		          value: d[a['name']]['value'],
-		          rendered: d[a['name']]['rendered'],
+		          rendered: d[a['name']]['rendered'] ? d[a['name']]['rendered'] : d[a['name']]['value'],
 		          links: d[a['name']]['links']
 		        });
 			});
