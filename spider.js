@@ -31,9 +31,10 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	     axisFont: 2,			//font of the axis labels
 	     scaleFont: 1,			//font of the scale
 	     legendPad: 10,			//separation between legend items
-	     legendFont: .8			//font of legend items
+	     legendFont: .8,			//font of legend items
+	     domainMax: null
 	};
-	
+
 	//Put all of the options into a variable called cfg
 	if('undefined' !== typeof options){
 	  for(var i in options){
@@ -42,11 +43,13 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	}//if
 	
 	//If the supplied maxValue is smaller than the actual one, replace by the max in the data
-	var maxValue = Math.max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
+	var maxValue = cfg.domainMax ? Math.max(cfg.domainMax, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))})) : d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))});
+
+	var deterSide = Math.min(cfg.w, cfg.h);
 		
 	var allAxis = (data[0].map(function(i, j){return i.axis})),	//Names of each axis
 		total = allAxis.length,					//The number of different axes
-		radius = Math.min(cfg.w*.5, cfg.legendSide === 'center' ? cfg.h*.4 : cfg.h*.5), 	//Radius of the outermost circle
+		radius = Math.min(deterSide*.35, cfg.legendSide === 'center' ? deterSide*.3 : deterSide*.45), 	//Radius of the outermost circle
 		Format = d3.format(",.0f"),			 	//Label formatting
 		angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
 	
@@ -73,7 +76,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	      maxValue.push(axesMax[d])
 	    });
   	} else {
-	    var maxValues = Math.max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
+	    var maxValues = cfg.domainMax ? Math.max(cfg.domainMax, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))})) : d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))});
 	    rScale = [];
 	    allAxis.map(function(d) {
 	      rScale.push(d3.scale.linear()
@@ -94,13 +97,13 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	d3.select(id).select("svg").remove();
 	//Initiate the radar chart SVG
 	var svg = d3.select(id).append("svg")
-			.attr("width",  cfg.w + cfg.margin.left + cfg.margin.right)
-			.attr("height", cfg.legendSide === 'center' ? cfg.h + cfg.margin.bottom*2 : cfg.h + cfg.margin.top + cfg.margin.bottom)
+			.attr("width",  cfg.w)
+			.attr("height", cfg.h + cfg.margin.bottom)
 			.attr("class", "radar"+id);
 	//Append a g element	
-	var moveH =	cfg.legendSide === 'center' ? (cfg.h/2 + cfg.margin.top*.5) : (cfg.h/2 + cfg.margin.top);
+	var moveH =	cfg.legendSide === 'center' ? (cfg.h/2 - cfg.margin.top) : (cfg.h/2 + cfg.margin.top);
 	var g = svg.append("g")
-			.attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + moveH + ")");
+			.attr("transform", "translate(" + (cfg.w/2) + "," + moveH + ")");
 	
 	/////////////////////////////////////////////////////////
 	////////// Glow filter for some extra pizzazz ///////////
@@ -130,7 +133,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	   .attr("x", 4)
 	   .attr("y", function(d){return -d*radius/cfg.levels;})
 	   .attr("dy", "0.4em")
-       .style("font-size", `${cfg.scaleFont}em`)
+       .style("font-size", cfg.independent ? '0px' : `${cfg.scaleFont}px`)
        .style("font-weight", "900")
        .style("font-family", "Open Sans")
   	   .style("z-index", 10)
@@ -140,7 +143,22 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	/////////////////////////////////////////////////////////
 	//////////////////// Draw the axes //////////////////////
 	/////////////////////////////////////////////////////////
-	
+	var negativeR = 1;
+	console.log(total);
+	if (cfg.roundStrokes) {
+		negativeR = 1;
+	} else if (total == 3) {
+		negativeR = .5;
+	} else if (total == 5) {
+		negativeR = .81
+	} else if (total == 7) {
+		negativeR = .9
+	} else if (total == 9) {
+		negativeR = .94
+	} else if (total == 11) {
+		negativeR = .96
+	}
+	console.log(negativeR);
 	//Create the straight lines radiating outward from the center
 	var axis = axisGrid.selectAll(".axis")
 		.data(allAxis)
@@ -158,7 +176,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	    	}
 	  	} else {
 		    if (cfg.negatives) {
-		      return rScale[i](maxValue[i]*-cfg.negativeR) * Math.cos(angleSlice*i - Math.PI/2);
+		      return rScale[i](maxValue[i]*-negativeR) * Math.cos(angleSlice*i - Math.PI/2);
 		    } else {
 		      return 0;
 		    }
@@ -173,7 +191,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	        }
 	    } else {
 	        if (cfg.negatives) {
-	          return rScale[i](maxValue[i]*-cfg.negativeR) * Math.sin(angleSlice*i - Math.PI/2);
+	          return rScale[i](maxValue[i]*-negativeR) * Math.sin(angleSlice*i - Math.PI/2);
 	        } else {
 	          return 0;
 	        }
@@ -188,13 +206,13 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	//Append the labels at each axis
 	axis.append("text")
 		.attr("class", "legend")
-		.style("font-size", `${cfg.axisFont}em`)
+		.style("font-size", `${cfg.axisFont}px`)
 	    .style("font-weight", "549")
 	  	.style("font-family", "Open Sans")
 		.attr("text-anchor", "middle")
 		.attr("dy", "1em")
 		.attr("x", function(d, i){ return rScale[i](maxValue[i]*cfg.labelFactor) * Math.cos(angleSlice*i - Math.PI/2); })
-		.attr("y", function(d, i){ return rScale[i](maxValue[i]*cfg.labelFactor) * Math.sin(angleSlice*i - Math.PI/2) - 25; })
+		.attr("y", function(d, i){ return rScale[i](maxValue[i]*cfg.labelFactor) * Math.sin(angleSlice*i - Math.PI/2) - cfg.labelFine; })
 		.text(function(d){return d})
 		.call(wrap, cfg.wrapWidth);
   
@@ -266,13 +284,13 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		.data(data)
 		.enter().append("g")
 		.attr("class", "radarWrapper")
-    	.attr("id", function(d,i) { return "v"+moreData[i].label; });
+    	.attr("id", function(d,i) { return "v"+moreData[i].label.replace(/[^A-Z0-9]+/ig, ""); });
 	
 	//Append the backgrounds	
 	blobWrapper
 		.append("path")
 		.attr("class", "radarArea")
-    	.attr("id", function(d,i) { return "v"+moreData[i].label; })
+    	.attr("id", function(d,i) { return "v"+moreData[i].label.replace(/[^A-Z0-9]+/ig, ""); })
 		.attr("d", function(d,i) { return radarLine(d); })
 		.style("fill", function(d,i) { return cfg.color(i); })
 		.style("fill-opacity", cfg.opacityArea)
@@ -315,7 +333,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	    	return rScale[i](cfg.negatives ? (d.value < 0 ? d.value*cfg.negativeR : d.value) : (d.value < 0 ? 0 : d.value)) * Math.sin(angleSlice*i - Math.PI/2); 
 	  	})
 		.style("fill", function(d,i,j) { return cfg.color(j); })
-		.style("fill-opacity", 0.8);
+		.style("fill-opacity", 1);
 
 	/////////////////////////////////////////////////////////
 	//////// Append invisible circles for tooltip ///////////
@@ -326,7 +344,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		.data(data)
 		.enter().append("g")
 		.attr("class", "radarCircleWrapper")
-    	.attr("child_id", function(d,i) { return "v"+moreData[i].label; });
+    	.attr("child_id", function(d,i) { return "v"+moreData[i].label.replace(/[^A-Z0-9]+/ig, ""); });
 		
 	//Append a set of invisible circles on top for the mouseover pop-up
 	blobCircleWrapper.selectAll(".radarInvisibleCircle")
@@ -353,23 +371,29 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 			d3.select(".radarArea#"+this.parentNode.getAttribute("child_id"))
 				.transition().duration(200)
 				.style("fill-opacity", 0.7);
+			var render = {value: d.rendered};
 			tooltip
 				.attr('x', newX)
 				.attr('y', newY)
-    			.text(Format(d.value))
+    			.text(LookerCharts.Utils.textForCell(render))
 				.transition().duration(200)
         		.style("font-family", "Open Sans")
     			.style("pointer-events", "none")
 				.style('opacity', 1);
 		})
-		.on("mouseout", function(){
+		.on("click", function(d,i) {
+			LookerCharts.Utils.openDrillMenu({
+	 			links: d.links,
+	 			event: event
+ 			});
+		})
+		.on("mouseout", function() {
 			tooltip.transition().duration(200)
 				.style("opacity", 0);
     		d3.selectAll(".radarArea")
 				.transition().duration(200)
 				.style("fill-opacity", cfg.opacityArea);
 		});
-
 	//Set up the small tooltip for when you hover over a circle
 	var tooltip = g.append("text")
 		.attr("class", "tooltip")
@@ -388,7 +412,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 
   	var svg = d3.select("svg");
 		if (cfg.legendSide === 'left') {
-	    legx = cfg.w/6;
+	    legx = 20;
 	    legy = 10;
 	    leg_orient = 'vertical';
 	    leg_pad = cfg.legendPad + 0;
@@ -398,7 +422,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	    leg_orient = 'vertical';
 	    leg_pad = cfg.legendPad + 0;
   	} else if (cfg.legendSide === 'center') {
-	    legy = window.innerHeight*.85;
+	    legy = window.innerHeight-(60);
 	    leg_orient = 'horizontal';
 	    leg_pad = cfg.legendPad + 50;
   	} else if (cfg.legendSide === 'none') {
@@ -410,7 +434,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 
  	svg.append("g")
     	.attr("class", "legendOrdinal")
-    	.style("font-size", `${cfg.legendFont}em`)
+    	.style("font-size", `${cfg.legendFont}px`)
     	.style("font-family", "Open Sans");
 
   	var legendOrdinal = d3.legend.color()
@@ -419,6 +443,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
     	.scale(ordinal)
   		.orient(leg_orient)
   		.on('cellclick', function(d) {
+  			var d = d.replace(/[^A-Z0-9]+/ig, "");
 	        toggleDataPoints(d);
 	        const legendCell = d3.select(this);
 	        legendCell.classed('hidden', !legendCell.classed('hidden'));  // toggle opacity of legend item
@@ -445,7 +470,10 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 
     //console.log(d3.select('.legendCells').node().getBBox().width);
     if (cfg.legendSide == 'center') {
-    	wid = window.innerWidth/2 - d3.select('.legendCells').node().getBBox().width/2;
+    	wid = window.innerWidth/2 - d3.select('.legendCells').node().getBBox().width/2 + cfg.margin.left;
+    	d3.select(".legendOrdinal").attr("transform", function(d) { return `translate(${wid},${legy})`});
+    } else if (cfg.legendSide == 'right') {
+    	wid = window.innerWidth - d3.select('.legendCells').node().getBBox().width*1.25;
     	d3.select(".legendOrdinal").attr("transform", function(d) { return `translate(${wid},${legy})`});
     } else {
     	d3.select(".legendOrdinal").attr("transform", function(d) { return `translate(${legx},${legy})`});
@@ -499,16 +527,30 @@ const baseOptions = {
       	section: "Plot"
     },
     label_factor: {
-     	type: "string",
+     	type: "number",
       	label: "Axis Label Padding",
-      	default: 1,
+      	default: 85,
       	section: "Plot - Advanced",
+      	display: "range",
       	order: 4
+    },
+    label_fine: {
+     	type: "number",
+      	label: "Axis Label - Fine Tuning Y",
+      	default: 15,
+      	section: "Plot - Advanced",
+      	display: "range",
+      	order: 5
     },
     levels: {
     	type: "number",
       	label: "Plot Levels",
       	default: 3,
+      	section: "Plot"
+    },
+    domain_max: {
+    	type: "number",
+      	label: "Axis Max Override",
       	section: "Plot"
     },
     rounded_strokes: {
@@ -524,7 +566,7 @@ const baseOptions = {
     },
     independent: {
       	type: "string",
-      	label: "Independent Axes?",
+      	label: "Normalize Axes?",
       	display: "select",
       	values: [
       	 	{"true": true},
@@ -546,9 +588,10 @@ const baseOptions = {
     },
     wrap_width: {
     	type: "number",
-      	label: "Label Wrapping",
-      	default: 30,
-      	section: "Plot - Advanced"
+      	label: "Axis Label Wrapping",
+      	default: 100,
+      	section: "Plot - Advanced",
+      	order: 6
     },
     opacity_area: {
       	type: "number",
@@ -575,19 +618,19 @@ const baseOptions = {
       	order: 2
     },
     backgroundColor: {
-        type: `array`,
+        type: `string`,
         label: `Background Color`,
         display: `color`,
         section: "Plot - Advanced",
-        default: ["#CDCDCD"],
+        default: "#CDCDCD",
         order: 1
     },
     axisColor: {
-        type: `array`,
+        type: `string`,
         label: `Axis Color`,
         display: `color`,
         section: "Plot - Advanced",
-        default: ["#CDCDCD"],
+        default: "#CDCDCD",
         order: 0
     },
     stroke_width: {
@@ -607,29 +650,20 @@ const baseOptions = {
     },
     axis_label_font: {
       	type: "number",
-      	label: "Label Font Size",
-      	default: 50,
-      	display: "range",
+      	label: "Axis Label Font Size (px)",
+      	default: 12,
       	section: "Plot - Advanced"
     },
     axis_scale_font: {
       	type: "number",
-      	label: "Axis Scale Font Size",
-      	default: 50,
-      	display: "range",
-      	section: "Plot - Advanced"
-    },
-    negative_r: {
-    	type: "number",
-      	label: "Negative Axis Size (use when Negatives are enabled)",
-      	default: 1,
+      	label: "Scale Font Size (px)",
+      	default: 12,
       	section: "Plot - Advanced"
     },
     legend_font: {
       	type: "number",
-      	label: "Legend Font Size",
-      	default: 80,
-      	display: "range",
+      	label: "Legend Font Size (px)",
+      	default: 12,
       	section: "Plot - Advanced"
     },
     legend_padding: {
@@ -677,38 +711,36 @@ const visObject = {
   **/
 	updateAsync: function(data, element, config, queryResponse, details, doneRendering){
     // set the dimensions and margins of the graph
-    marginY = element.clientHeight*.15;
-    marginX = element.clientWidth*.15;
     const addLight = function(color, amount){
 	  	let cc = parseInt(color,16) + amount;
 	  	let c = (cc > 255) ? 255 : (cc);
 	  	c = (c.toString(16).length > 1 ) ? c.toString(16) : `0${c.toString(16)}`;
 	  	return c;
 	}
-
 	const lighten = (color, amount)=> {
 	  	color = (color.indexOf("#")>=0) ? color.substring(1,color.length) : color;
 	  	amount = parseInt((255*amount)/100);
 	  	return color = `#${addLight(color.substring(0,2), amount)}${addLight(color.substring(2,4), amount)}${addLight(color.substring(4,6), amount)}`;
 	}
-    //console.log(marginY);
-    var margin = {top: marginY, right: marginX, bottom: marginY, left: marginX},
-        width = element.clientWidth - margin.left - margin.right,
-        height = element.clientHeight - margin.top - margin.bottom;
+
+    var margin = {top: 20, right: 20, bottom: 20, left: 20},
+        width = element.clientWidth,
+        height = element.clientHeight;
+
+    //console.log(data);
 
     // append the svg object to the body of the page
     // append a 'group' element to 'svg'
     // moves the 'group' element to the top left margin
     element.innerHTML = ""
     var svg = d3.select("#vis").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width)
+        .attr("height", height)
       	.append("g")
-        .attr("transform", 
-              "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var series_default = ["#4A80BC", "#615894", "#F0C733", "#D13452", "#E48522", "#B977A9", "#7bc739", "#92b3d7", "#e38597"]
-    //console.log(data);
+    var series_default = ["#4A80BC", "#615894", "#F0C733", "#D13452", "#E48522", "#B977A9", "#7bc739", "#92b3d7", "#e38597"];
+
     if (queryResponse['pivots']) {
 	    // grab the series labels
 	    series = [];
@@ -725,6 +757,13 @@ const visObject = {
 	      this.addError({
 	        title: "Multiple measures only.",
 	        message: "This chart requires at least 3 measures."
+	      });
+	      return;
+	    }
+	    if (queryResponse['fields']['dimensions'].length > 0) {
+	      this.addError({
+	        title: "Single dimension only.",
+	        message: "This chart accepts only 1, pivoted or unpivoted dimension."
 	      });
 	      return;
 	    }
@@ -758,7 +797,7 @@ const visObject = {
 	        set.push(v);
 	      });
 	      moreData.push({
-	        label: s.replace("/", "-").replace("'", "").replace("|", ""),
+	        label: s,
 	        data: set,
 	        color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7)
 	      });
@@ -781,6 +820,13 @@ const visObject = {
 	      });
 	      return;
 	    }
+	    if (queryResponse['fields']['dimension_like'].length > 1) {
+	      this.addError({
+	        title: "Single dimension only.",
+	        message: "This chart accepts only 1, pivoted or unpivoted dimension."
+	      });
+	      return;
+	    }
 		originalData = data;
 		console.log(queryResponse['fields']['measure_like']);
 		qrn = queryResponse["fields"]["dimensions"][0].name;
@@ -799,7 +845,9 @@ const visObject = {
 				values.push({
 		          axis: a['label'],
 		          name: a['name'],
-		          value: d[a['name']]['value']
+		          value: d[a['name']]['value'],
+		          rendered: d[a['name']]['rendered'],
+		          links: d[a['name']]['links']
 		        });
 			});
 			set = [];
@@ -807,7 +855,7 @@ const visObject = {
 	          set.push(v);
 	        });
 	        moreData.push({
-	          label: String(d[qrn]['value']).replace("/", "-").replace("'", "").replace("|", ""),
+	          label: String(d[qrn]['value']),
 	          data: set,
 	          color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7)
 	        });
@@ -815,7 +863,7 @@ const visObject = {
 		});
 		series = moreData.map(s => s.label);
 	}
-	//console.log(formattedData);
+	console.log(formattedData);
 	//console.log(moreData);
 	//color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7),
     opt = Object.assign({}, baseOptions)
@@ -843,9 +891,10 @@ const visObject = {
 	  	levels: config.levels,
 	  	roundStrokes: config.rounded_strokes,
 	  	color: color,
-	  	axisFont: config.axis_label_font/80,
-	  	scaleFont: config.axis_scale_font/80,
-      	labelFactor: config.label_factor*1.25,
+	  	axisFont: config.axis_label_font,
+	  	scaleFont: config.axis_scale_font,
+      	labelFactor: config.label_factor*1.5/100,
+      	labelFine: config.label_fine*1.2,
       	wrapWidth: config.wrap_width,
       	opacityArea: config.opacity_area/100,
       	dotRadius: config.dot_radius/5,
@@ -860,7 +909,8 @@ const visObject = {
       	negativeR: config.negative_r,
       	independent: config.independent,
       	legendPad: config.legend_padding,
-      	legendFont: config.legend_font/80
+      	legendFont: config.legend_font,
+      	domainMax: config.domain_max
 	};
     //this.trigger('registerOptions', visOptions);
 
