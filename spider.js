@@ -32,7 +32,8 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	     scaleFont: 1,			//font of the scale
 	     legendPad: 10,			//separation between legend items
 	     legendFont: .8,			//font of legend items
-	     domainMax: null
+	     domainMax: null,
+	     labelScale: true
 	};
 
 	//Put all of the options into a variable called cfg
@@ -126,20 +127,40 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	
 	//console.log(d3.range(1,(cfg.levels+1)).reverse());
 	//Text indicating at what % each level is
-	axisGrid.selectAll(".axisLabel")
-	   .data(d3.range(1,(cfg.levels+1)).reverse())
-	   .enter().append("text")
-	   .attr("class", "axisLabel")
-	   .attr("x", 4)
-	   .attr("y", function(d){return -d*radius/cfg.levels;})
-	   .attr("dy", "0.4em")
-       .style("font-size", cfg.independent ? '0px' : `${cfg.scaleFont}px`)
-       .style("font-weight", "900")
-       .style("font-family", "Open Sans")
-  	   .style("z-index", 10)
-	   .attr("fill", cfg.axisColor)
-	   .text(function(d) { return Format(maxValue[0] * d/cfg.levels); });
-
+	if (cfg.labelScale) {
+	if (cfg.independent) {
+		allAxis.forEach(function(d, i) {
+			console.log(d, maxValue[i]);
+			d3.range(1,(cfg.levels+1)).reverse().forEach(function(dd, ii) {
+				axisGrid.append("text")
+				   .attr("class", "axisLabel")
+				   .attr("x", dd/cfg.levels * radius * Math.cos(angleSlice*i - Math.PI/2))
+				   .attr("y", dd/cfg.levels * radius * Math.sin(angleSlice*i - Math.PI/2))
+				   .attr("dy", "0.6em")
+			       .style("font-size", `${cfg.scaleFont}px`)
+			       .style("font-weight", "900")
+			       .style("font-family", "Open Sans")
+			  	   .style("z-index", 10)
+				   .attr("fill", cfg.axisColor)
+				   .text(Format((maxValue[i]) * dd/cfg.levels));
+			});
+		});
+	} else {
+		axisGrid.selectAll(".axisLabel")
+		   .data(d3.range(1,(cfg.levels+1)).reverse())
+		   .enter().append("text")
+		   .attr("class", "axisLabel")
+		   .attr("x", 4)
+		   .attr("y", function(d){return -d*radius/cfg.levels;})
+		   .attr("dy", "0.4em")
+	       .style("font-size", `${cfg.scaleFont}px`)
+	       .style("font-weight", "900")
+	       .style("font-family", "Open Sans")
+	  	   .style("z-index", 10)
+		   .attr("fill", cfg.axisColor)
+		   .text(function(d) { return Format(maxValue[0] * d/cfg.levels); });
+	}
+	}
 	/////////////////////////////////////////////////////////
 	//////////////////// Draw the axes //////////////////////
 	/////////////////////////////////////////////////////////
@@ -536,7 +557,7 @@ const baseOptions = {
     },
     label_fine: {
      	type: "number",
-      	label: "Axis Label - Fine Tuning Y",
+      	label: "Axis Label Positioning",
       	default: 15,
       	section: "Plot - Advanced",
       	display: "range",
@@ -573,6 +594,17 @@ const baseOptions = {
       	 	{"false": false}
       	],
       	default: false,
+      	section: "Plot"
+    },
+    labelScale: {
+      	type: "string",
+      	label: "Label Scale?",
+      	display: "select",
+      	values: [
+      	 	{"true": true},
+      	 	{"false": false}
+      	],
+      	default: true,
       	section: "Plot"
     },
     negatives: {
@@ -912,7 +944,8 @@ const visObject = {
       	independent: config.independent,
       	legendPad: config.legend_padding,
       	legendFont: config.legend_font,
-      	domainMax: config.domain_max
+      	domainMax: config.domain_max,
+      	labelScale: config.labelScale
 	};
     //this.trigger('registerOptions', visOptions);
 
