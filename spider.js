@@ -6,7 +6,7 @@
  *  - Example Visualizations - https://github.com/looker/custom_visualizations_v2/tree/master/src/examples
  **/
 
-function RadarChart(id, data, options, moreData, colorSeries, originalData, axes) {
+function RadarChart(id, data, options, moreData, colorSeries, originalData, axes, doneRendering) {
 	var cfg = {
 		 w: 600,	//Width of the circle
 		 h: 600,	//Height of the circle
@@ -538,7 +538,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
             return !d3.select(this).classed('hidden');
         });
    	}
-	
+	doneRendering();
 }//RadarChart
 const baseOptions = {
 	levels: {
@@ -950,8 +950,7 @@ const visObject = {
     //this.trigger('registerOptions', visOptions);
 
 	//Call function to draw the Radar chart
-    svg.append("g").call(RadarChart("#vis", formattedData, radarChartOptions1, moreData, [], originalData, axes));
-	doneRendering()
+    svg.append("g").call(RadarChart("#vis", formattedData, radarChartOptions1, moreData, [], originalData, axes, doneRendering));
 	}
 };
 
