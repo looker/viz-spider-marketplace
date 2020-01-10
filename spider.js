@@ -951,7 +951,7 @@ const visObject = {
 
 	//Call function to draw the Radar chart
     svg.append("g").call(RadarChart("#vis", formattedData, radarChartOptions1, moreData, [], originalData, axes));
-	done()
+	doneRendering()
 	}
 };
 
