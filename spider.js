@@ -130,7 +130,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	if (cfg.labelScale) {
 	if (cfg.independent) {
 		allAxis.forEach(function(d, i) {
-			console.log(d, maxValue[i]);
+			//console.log(d, maxValue[i]);
 			d3.range(1,(cfg.levels+1)).reverse().forEach(function(dd, ii) {
 				axisGrid.append("text")
 				   .attr("class", "axisLabel")
@@ -165,7 +165,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	//////////////////// Draw the axes //////////////////////
 	/////////////////////////////////////////////////////////
 	var negativeR = 1;
-	console.log(total);
+	//console.log(total);
 	if (cfg.roundStrokes) {
 		negativeR = 1;
 	} else if (total == 3) {
@@ -179,7 +179,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	} else if (total == 11) {
 		negativeR = .96
 	}
-	console.log(negativeR);
+	//console.log(negativeR);
 	//Create the straight lines radiating outward from the center
 	var axis = axisGrid.selectAll(".axis")
 		.data(allAxis)
@@ -778,7 +778,7 @@ const visObject = {
 	    series = [];
 	    //console.log(queryResponse['fields']['measure_like'].length % 2);
 	    if (!(queryResponse['fields']['measure_like'].length % 2) && config.negatives) {
-	    	console.log("troof");
+	    	//console.log("troof");
 	      this.addError({
 	        title: "Can't display negatives with symmetric axes.",
 	        message: "Negatives can only be plotted on odd number of axes."
@@ -862,7 +862,7 @@ const visObject = {
 	      return;
 	    }
 		originalData = data;
-		console.log(queryResponse['fields']['measure_like']);
+		//console.log(queryResponse['fields']['measure_like']);
 		qrn = queryResponse["fields"]["dimensions"][0].name;
 		axes = [];
 	    queryResponse['fields']['measure_like'].forEach(function(d) {
@@ -897,7 +897,7 @@ const visObject = {
 		});
 		series = moreData.map(s => s.label);
 	}
-	console.log(formattedData);
+	//console.log(formattedData);
 	//console.log(moreData);
 	//color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7),
     opt = Object.assign({}, baseOptions)
