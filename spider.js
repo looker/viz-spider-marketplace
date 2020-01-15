@@ -127,7 +127,6 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	
 	//console.log(d3.range(1,(cfg.levels+1)).reverse());
 	//Text indicating at what % each level is
-	if (cfg.labelScale) {
 	if (cfg.independent) {
 		allAxis.forEach(function(d, i) {
 			//console.log(d, maxValue[i]);
@@ -136,8 +135,9 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 				   .attr("class", "axisLabel")
 				   .attr("x", dd/cfg.levels * radius * Math.cos(angleSlice*i - Math.PI/2))
 				   .attr("y", dd/cfg.levels * radius * Math.sin(angleSlice*i - Math.PI/2))
-				   .attr("dy", "0.6em")
-			       .style("font-size", `${cfg.scaleFont}px`)
+				   .attr("dy", "0.35em")
+				   .attr("dy", "0.35em")
+			       .style("font-size", `${cfg.labelScale ? cfg.scaleFont : 0}px`)
 			       .style("font-weight", "900")
 			       .style("font-family", "Open Sans")
 			  	   .style("z-index", 10)
@@ -153,13 +153,12 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		   .attr("x", 4)
 		   .attr("y", function(d){return -d*radius/cfg.levels;})
 		   .attr("dy", "0.4em")
-	       .style("font-size", `${cfg.scaleFont}px`)
+	       .style("font-size", `${cfg.labelScale ? cfg.scaleFont : 0}px`)
 	       .style("font-weight", "900")
 	       .style("font-family", "Open Sans")
 	  	   .style("z-index", 10)
 		   .attr("fill", cfg.axisColor)
 		   .text(function(d) { return Format(maxValue[0] * d/cfg.levels); });
-	}
 	}
 	/////////////////////////////////////////////////////////
 	//////////////////// Draw the axes //////////////////////
@@ -231,6 +230,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	    .style("font-weight", "549")
 	  	.style("font-family", "Open Sans")
 		.attr("text-anchor", "middle")
+		.style('fill', 'rgb(102, 102, 102)')
 		.attr("dy", "1em")
 		.attr("x", function(d, i){ return rScale[i](maxValue[i]*cfg.labelFactor) * Math.cos(angleSlice*i - Math.PI/2); })
 		.attr("y", function(d, i){ return rScale[i](maxValue[i]*cfg.labelFactor) * Math.sin(angleSlice*i - Math.PI/2) - cfg.labelFine; })
@@ -250,40 +250,78 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		    .style("fill-opacity", cfg.opacityCircles)
 		    .style("filter" , "url(#glow)");
   	} else {
-	    levels = []
-	    axisGrid.selectAll(".axisLabel").forEach(function(d) {
-	      s = d.length;
-	      d.forEach(function(d) {
-	        set = []
-	        r = parseInt(d.getAttribute("y"));
-	        axis[0].forEach(function(d,i) {
-	          tempx = r * Math.cos(angleSlice*i - Math.PI*3/2);
-	          tempy = r * Math.sin(angleSlice*i - Math.PI*3/2);
-	          set.push({
-	            x: tempx,
-	            y: tempy
-	          });
-	        });
-	        levels.push(set);
-	      });
-	    });
-	    //console.log(levels);
-	    levels.forEach(function(d) {
-	      //console.log(d);
-	      axisGrid.selectAll(".levels")
-	        .data([d])
-	        .enter().append("polygon")
-	        .attr("points",function(d) { 
-	          return d.map(function(d) {
-	              return [d.x,d.y].join(",");
-	          }).join(" ");
-	        })
-	        .attr("class", "gridCircle")
-	        .style("fill", function(d, i){ return cfg.backgroundColor })
-	        .style("stroke", function(d, i){ return cfg.axisColor })
-	        .style("fill-opacity", cfg.opacityCircles)
-	        .style("filter" , "url(#glow)");
-	    });
+  		if (cfg.independent) {
+  			levels = []
+		    axisGrid.selectAll(".axisLabel").forEach(function(d) {
+		      s = d.length;
+		      var n = s/total;
+		      d.slice(0, n).forEach(function(d) {
+		        set = []
+		        r = parseInt(d.getAttribute("y"));
+		        axis[0].forEach(function(d,i) {
+		          tempx = r * Math.cos(angleSlice*i - Math.PI*3/2);
+		          tempy = r * Math.sin(angleSlice*i - Math.PI*3/2);
+		          set.push({
+		            x: tempx,
+		            y: tempy
+		          });
+		        });
+		        levels.push(set);
+		      });
+		    });
+		    // console.log(levels);
+		    levels.forEach(function(d) {
+		      //console.log(d);
+		      axisGrid.selectAll(".levels")
+		        .data([d])
+		        .enter().append("polygon")
+		        .attr("points",function(d) { 
+		          return d.map(function(d) {
+		              return [d.x,d.y].join(",");
+		          }).join(" ");
+		        })
+		        .attr("class", "gridCircle")
+		        .style("fill", function(d, i){ return cfg.backgroundColor })
+		        .style("stroke", function(d, i){ return cfg.axisColor })
+		        .style("fill-opacity", cfg.opacityCircles)
+		        .style("filter" , "url(#glow)");
+		    });
+  		} else {
+  			levels = []
+		    axisGrid.selectAll(".axisLabel").forEach(function(d) {
+		      s = d.length;
+		      d.forEach(function(d) {
+		        set = []
+		        r = parseInt(d.getAttribute("y"));
+		        axis[0].forEach(function(d,i) {
+		          tempx = r * Math.cos(angleSlice*i - Math.PI*3/2);
+		          tempy = r * Math.sin(angleSlice*i - Math.PI*3/2);
+		          set.push({
+		            x: tempx,
+		            y: tempy
+		          });
+		        });
+		        levels.push(set);
+		      });
+		    });
+		    // console.log(levels);
+		    levels.forEach(function(d) {
+		      //console.log(d);
+		      axisGrid.selectAll(".levels")
+		        .data([d])
+		        .enter().append("polygon")
+		        .attr("points",function(d) { 
+		          return d.map(function(d) {
+		              return [d.x,d.y].join(",");
+		          }).join(" ");
+		        })
+		        .attr("class", "gridCircle")
+		        .style("fill", function(d, i){ return cfg.backgroundColor })
+		        .style("stroke", function(d, i){ return cfg.axisColor })
+		        .style("fill-opacity", cfg.opacityCircles)
+		        .style("filter" , "url(#glow)");
+		    });
+  		}
   	};
 
 	/////////////////////////////////////////////////////////
@@ -456,7 +494,8 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
  	svg.append("g")
     	.attr("class", "legendOrdinal")
     	.style("font-size", `${cfg.legendFont}px`)
-    	.style("font-family", "Open Sans");
+    	.style("font-family", "Open Sans")
+    	.style("fill", 'rgb(102, 102, 102)');
 
   	var legendOrdinal = d3.legend.color()
     	.shape("path", d3.svg.symbol().type("circle").size(120)())
