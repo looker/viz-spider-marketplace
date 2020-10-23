@@ -26,7 +26,7 @@ Great! Marketplace content -- including visualizations -- were designed for cont
     ```
     Your compiled code can be found in this repo.
 
-**`radialgauge.js`**: This visualization's minified distribution file. 
+**`spider.js`**: This visualization's minified distribution file. 
 
 **`LICENSE`**: Looker's Marketplace content License file.
 
