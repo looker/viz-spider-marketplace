@@ -438,11 +438,32 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 				.style('opacity', 1);
 		})
 		.on("click", function(d,i) {
-			LookerCharts.Utils.openDrillMenu({
-	 			links: d.links,
-	 			event: event
- 			});
+			// adds crossfilter support
+			if(options.crossfilterEnabled) {
+				LookerCharts.Utils.crossfilter({
+					row: d.row,
+					event // used to capture cmd key for adding a selection
+				})
+			} else {
+				LookerCharts.Utils.openDrillMenu({
+					links: d.links,
+					event: event
+				});
+			}
 		})
+		// Add support for right-click action
+		.on("contextmenu", function(d,i) {
+			LookerCharts.Utils.openDrillMenu({
+				links: d.links,
+				event: event,
+				// new forceMenu property
+				forceMenu: true
+			});
+
+			// prevent default browser context menu 
+			return false
+			}
+		)
 		.on("mouseout", function() {
 			tooltip.transition().duration(200)
 				.style("opacity", 0);
@@ -858,7 +879,9 @@ const visObject = {
 	          name: a['name'],
 	          value: data[0][a['name']][s]['value'],
 	          rendered: data[0][a['name']][s]['rendered'] ? data[0][a['name']][s]['rendered'] : data[0][a['name']][s]['value'],
-	          links: data[0][a['name']][s]['links']
+	          links: data[0][a['name']][s]['links'],
+			  row: data,
+			  selected: LookerCharts.Utils.isCrossfilterSelected(data)
 	        });
 	      });
 	      set = [];
@@ -916,7 +939,9 @@ const visObject = {
 		          name: a['name'],
 		          value: d[a['name']]['value'],
 		          rendered: d[a['name']]['rendered'] ? d[a['name']]['rendered'] : d[a['name']]['value'],
-		          links: d[a['name']]['links']
+				  links: d[a['name']]['links'],
+				  row: d,
+				  selected: LookerCharts.Utils.isCrossfilterSelected(d)
 		        });
 			});
 			set = [];
@@ -980,7 +1005,8 @@ const visObject = {
       	legendPad: config.legend_padding,
       	legendFont: config.legend_font,
       	domainMax: config.domain_max,
-      	labelScale: config.labelScale
+		labelScale: config.labelScale,
+		crossfilterEnabled: config.crossfilterEnabled  
 	};
     //this.trigger('registerOptions', visOptions);
 
