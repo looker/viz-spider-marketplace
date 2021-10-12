@@ -777,6 +777,14 @@ const visObject = {
   * the data and should update the visualization with the new data.
   **/
 	updateAsync: function(data, element, config, queryResponse, details, doneRendering){
+	if (data.length < 1) {
+		this.addError({
+			title: "No results.",
+			message: ""
+		})
+		doneRendering();
+		return;
+	}
     // set the dimensions and margins of the graph
     const addLight = function(color, amount){
 	  	let cc = parseInt(color,16) + amount;
